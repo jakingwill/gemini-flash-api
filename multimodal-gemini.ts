@@ -36,13 +36,34 @@ async function waitForFilesActive(...files: any[]) {
 
 // 3. Configuring the generative model
 const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro-latest",
-    systemInstructions: "You are a helpful assistant.",
+    model: "gemini-1.5-flash-latest",
+    systemInstructions: "You are a document summarizer. Given a text extracted from a school assessment, summarize the key information in the following format:
+
+    {
+      "questions": [
+        {
+          "question_number": "",
+          "question_text": "",
+          "total_marks": "",
+          "marking_guide": ""
+        }
+      ],
+      "answers": [
+        {
+          "question_number": "",
+          "student_answer": ""
+        }
+      ]
+    }
+
+    - Focus on identifying questions, their text, total marks (if available), and marking guide (if available).
+    - Summarize student answers for each question.
+    - If information is missing, indicate "Not Found".",
 });
 const generationConfig = {
     temperature: 1,
     maxOutputTokens: 8192,
-    responseMimeType: "text/plain",
+    responseMimeType: "application/json",
 };
 
 async function run() {
@@ -51,9 +72,10 @@ async function run() {
     const audio1 = await uploadToGemini("./audio1.mp3", "audio/mp3");
     const image1 = await uploadToGemini("./image1.jpeg", "image/jpeg");
     const image2 = await uploadToGemini("./image2.jpg", "image/jpeg");
+    const pdf1 = await uploadToGemini("./pdf1.pdf", "application/pdf.");
 
     // 5. Wait for all uploaded files to be processed and ready
-    await waitForFilesActive(video1, audio1, image1, image2);
+    await waitForFilesActive(video1, audio1, image1, image2, pdf1);
 
     // 6. Start a chat session with the model using the uploaded files
     const chatSession = model.startChat({
@@ -62,6 +84,13 @@ async function run() {
             {
                 role: "user",
                 parts: [
+                    {
+                        // Sending pdf1 as part of the user message
+                        fileData: {
+                            mimeType: pdf1.mimeType,
+                            fileUri: pdf1.uri,
+                        },
+                    },
                     {
                         // Sending audio1 as part of the user message
                         fileData: {
@@ -95,7 +124,7 @@ async function run() {
     });
 
     // 7. Send a message to the chat session and log the response
-    const result = await chatSession.sendMessage("Describe in detail the differences between everything i passed in");
+    const result = await chatSession.sendMessage("Here is my file. Please adhere to your system instructions. Thanks");
     console.log(result.response.usageMetadata);
     console.log(result.response.text());
 }
