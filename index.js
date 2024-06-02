@@ -7,7 +7,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
 // 1. Function to upload files to Gemini
-async function uploadToGemini(filePath: string, mimeType: string) {
+async function uploadToGemini(filePath, mimeType) {
     const uploadResult = await fileManager.uploadFile(filePath, {
         mimeType,
         displayName: path.basename(filePath),
@@ -18,7 +18,7 @@ async function uploadToGemini(filePath: string, mimeType: string) {
 }
 
 // 2. Function to wait until files are processed and ready
-async function waitForFilesActive(...files: any[]) {
+async function waitForFilesActive(...files) {
     console.log("Waiting for file processing...");
     for (const name of files.map((file) => file.name)) {
         let file = await fileManager.getFile(name);
