@@ -1,8 +1,10 @@
 // 0. Importing the necessary modules
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { GoogleAIFileManager } = require("@google/generative-ai/files");
-const path = require("path");
-const apiKey = process.env.GEMINI_API_KEY;
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleAIFileManager } from "@google/generative-ai/files";
+import path from "path";
+import { env } from "process"; // Assuming process.env is accessible through env
+
+const apiKey = env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
